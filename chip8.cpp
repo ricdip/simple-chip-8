@@ -1,6 +1,7 @@
 #include "chip8.hpp"
 
 #include <fstream>
+#include <stdexcept>
 
 unsigned char chip8Fontset[80] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
@@ -105,7 +106,7 @@ void Chip8::load(const char* programPath) {
 
         delete[] fileContent;
     } else {
-        throw "Unable to open file";
+        throw std::runtime_error("Unable to open file");
     }
 }
 
@@ -172,7 +173,7 @@ void Chip8::emulateCycle() {
             break;
 
         default:
-            throw "Unknown opcode";
+            throw std::runtime_error("Unknown opcode");
     }
 
     // update timers
