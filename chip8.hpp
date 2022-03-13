@@ -77,6 +77,8 @@ class Chip8 {
     void init();
 
    public:
+    // if drawFlag is true, redraw the screen
+    bool drawFlag = false;
     // initialize CHIP-8 emulator (calls init function)
     Chip8();
     // loads the program into the memory

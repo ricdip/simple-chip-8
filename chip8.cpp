@@ -134,6 +134,7 @@ void Chip8::emulateCycle() {
                     for (unsigned int i = 0; i < GFX_LEN; i++) {
                         gfx[i] = 0;
                     }
+                    drawFlag = true;
                     PC += 2;
                     break;
 
@@ -172,8 +173,50 @@ void Chip8::emulateCycle() {
             break;
 
         // DXYN: display
-        case 0xD000:
-            break;
+        // Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels
+        // and a height of N pixels. Each row of 8 pixels is read as bit-coded
+        // starting from memory location I; I value doesn’t change after the
+        // execution of this instruction. As described above, VF is set to 1 if
+        // any screen pixels are flipped from set to unset when the sprite is
+        // drawn, and to 0 if that doesn’t happen.
+        case 0xD000: {
+            // fetch position and height of the sprite
+            unsigned short x = V[(opcode & 0x0F00) >> 8];
+            unsigned short y = V[(opcode & 0x00F0) >> 4];
+            unsigned short height = opcode & 0x000F;
+            // pixel value
+            unsigned short pixel;
+            // reset register VF
+            V[0xF] = 0;
+            // loop over each row
+            for (int yline = 0; yline < height; yline++) {
+                // fetch the pixel value from the memory
+                // starting at location I
+                pixel = memory[I + yline];
+                // loop over 8-bits of 1 row
+                for (int xline = 0; xline < 8; xline++) {
+                    // check if current evaluated pixel is set
+                    // to 1 (`0x80 >> xline` scan through the byte, one bit at
+                    // the time -> 0x80 = 10000000)
+                    if ((pixel & (0x80 >> xline)) != 0) {
+                        // check if the pixel on the display is set to 1. If it
+                        // is set to 1, we need to register the collision by
+                        // setting the VF register
+                        if (gfx[x + xline + ((y + yline) * 64)] == 1) {
+                            V[0xF] = 1;
+                        }
+                        // set the pixel value by using bitwise XOR
+                        gfx[x + xline + ((y + yline) * 64)] ^= 1;
+                    }
+                }
+            }
+
+            // we changed gfx[], so we need to update the screen
+            drawFlag = true;
+            // update the Program Counter to move to the next opcode
+            PC += 2;
+
+        } break;
 
         default:
             throw std::runtime_error("Unknown opcode");
