@@ -98,6 +98,7 @@ void Chip8::load(const char* programPath) {
         file.close();
 
         // loading program ROM into memory
+        // (we start filling the memory from location 0x200 = 512)
         for (unsigned int i = 0; i < size; i++) {
             memory[i + 512] = fileContent[i];
         }
@@ -108,4 +109,81 @@ void Chip8::load(const char* programPath) {
     }
 }
 
-void Chip8::emulateCycle() {}
+void Chip8::emulateCycle() {
+    // fetch opcode
+    // an opcode is 2 bytes long
+    // in order to merge both bytes, we have to:
+    //  - fetch the first byte (at location PC)
+    //  - shift it 8 bit to the left (to make enough space for the second byte)
+    //  - fetch the second byte (at location PC + 1 (the next byte))
+    //  - use the bitwise OR operation to merge both bytes
+    opcode = (memory[PC] << 8) | memory[PC + 1];
+
+    // decode opcode
+    // an opcode consist of 2 bytes = 4 nibbles (or half-bytes)
+    // the first nibble divides CHIP-8 instructions into broad categories: so we
+    // have to mask (bitwise AND) the first nibble in the instruction
+    switch (opcode & 0xF000) {
+        // 00E_: can be 00E0 or 00EE
+        // we have to mask the last nibble to find out
+        case 0x0000:
+            switch (opcode & 0x000F) {
+                // 00E0: clear screen
+                case 0x0000:
+                    for (unsigned int i = 0; i < GFX_LEN; i++) {
+                        gfx[i] = 0;
+                    }
+                    PC += 2;
+                    break;
+
+                // 00EE: return from subroutine
+                case 0x000E:
+                    break;
+            }
+            break;
+
+        // 1NNN: jump
+        case 0x1000:
+            // we set PC to NNN, causing the program to jump
+            // to that memory location. We do not increment PC afterwards
+            PC = opcode & 0x0FFF;
+            break;
+
+        // 6XNN: set VX = NN
+        case 0x6000:
+            V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+            PC += 2;
+            break;
+
+        // 7XNN: adds NN to VX (carry flag is not changed)
+        case 0x7000:
+            V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+            PC += 2;
+            break;
+
+        // ANNN: sets I = NNN
+        case 0xA000:
+            I = opcode & 0x0FFF;
+            PC += 2;
+            break;
+
+        // DXYN: display
+        case 0xD000:
+            break;
+
+        default:
+            throw "Unknown opcode";
+    }
+
+    // update timers
+    if (delayTimer > 0) {
+        delayTimer--;
+    }
+
+    if (soundTimer > 0) {
+        if (soundTimer == 1) {
+            // TODO: sound beep
+        }
+        soundTimer--;
+    }
+}
