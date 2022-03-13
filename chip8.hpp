@@ -68,18 +68,19 @@ class Chip8 {
     // the current state of the key with only 1 byte)
     unsigned char key[KEY_LEN];
 
-    // default setting for PC (0x200)
-    // reset opcode, I, SP
-    // clear display (gfx), stack, registers (V0-VF), memory
-    // load fontset into the memory
-    // reset timers
+    // initialize CHIP-8 emulator:
+    //  - set default value for PC (0x200)
+    //  - reset opcode, I, SP
+    //  - clear display (gfx), stack, registers (V0-VF), memory
+    //  - load fontset into the memory
+    //  - reset timers
     void init();
 
    public:
-    // calls init function
+    // initialize CHIP-8 emulator (calls init function)
     Chip8();
     // loads the program into the memory
-    void load();
+    void load(const char* programPath);
     // emulates one cycle (one opcode execution):
     //  - fetch, decode, execute opcode
     //  - update timers
