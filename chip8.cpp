@@ -139,6 +139,9 @@ void Chip8::emulateCycle() {
 
                 // 00EE: return from subroutine
                 case 0x000E:
+                    SP--;
+                    PC = stack[SP];
+                    PC += 2;
                     break;
             }
             break;
