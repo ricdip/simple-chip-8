@@ -234,3 +234,5 @@ void Chip8::emulateCycle() {
         soundTimer--;
     }
 }
+
+const bool* Chip8::getGfx() const { return gfx; }

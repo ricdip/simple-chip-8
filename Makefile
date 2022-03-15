@@ -1,10 +1,11 @@
 # compiler options
 CC = g++
 CFLAGS = -pedantic -Wall -Wextra -Werror
+SDLFLAGS = $(shell pkg-config --cflags --libs sdl2)
 CFLAGSDEBUG = -pedantic -Wall -Wextra -Werror -fsanitize=address -g
 
 # sources and objects
-SRC = chip8.cpp main.cpp
+SRC = display.cpp chip8.cpp main.cpp
 OBJ = main.exe
 OBJDEBUG = main_debug.exe
 
@@ -24,11 +25,11 @@ help:
 
 build: $(SRC)
 	@echo "Building application files..."
-	$(CC) $(CFLAGS) $(SRC) -o $(OBJ)
+	$(CC) $(CFLAGS) $(SDLFLAGS) $(SRC) -o $(OBJ)
 
 build_debug: $(SRC)
 	@echo "Building application files for debug..."
-	$(CC) $(CFLAGSDEBUG) $(SRC) -o $(OBJDEBUG)
+	$(CC) $(CFLAGSDEBUG) $(SDLFLAGS) $(SRC) -o $(OBJDEBUG)
 
 clean:
 	@echo "Cleaning application files..."

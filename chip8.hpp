@@ -87,6 +87,10 @@ class Chip8 {
     //  - fetch, decode, execute opcode
     //  - update timers
     void emulateCycle();
+
+    // returns graphics array for displaying
+    // purposes
+    const bool* getGfx() const;
 };
 
 #endif
