@@ -1,10 +1,10 @@
 #include <SDL2/SDL.h>
 
-#include <chrono>
-#include <thread>
-
 #include "chip8.hpp"
 #include "display.hpp"
+
+#define FPS 60
+#define MS_PER_CYCLE 1000 / FPS
 
 int main(void) {
     Chip8 chip8;
@@ -19,6 +19,7 @@ int main(void) {
 
     // emulation cycle
     bool running = true;
+    unsigned int startTick, endTick, frameSpeed;
     while (running) {
         // event loop
         while (SDL_PollEvent(&event)) {
@@ -33,11 +34,19 @@ int main(void) {
             }
         }
 
+        startTick = SDL_GetTicks();
         chip8.emulateCycle();
-        display.drawPixels(chip8.getGfx(), GFX_LEN, 64);
+        if (chip8.drawFlag) {
+            chip8.drawFlag = false;
+            display.drawPixels(chip8.getGfx(), GFX_LEN, 64);
+        }
+        endTick = SDL_GetTicks();
+        frameSpeed = endTick - startTick;
 
         // we need the sleep function to slow down the emulation
-        std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+        if (frameSpeed < MS_PER_CYCLE) {
+            SDL_Delay(MS_PER_CYCLE - frameSpeed);
+        }
     }
 
     display.close();
