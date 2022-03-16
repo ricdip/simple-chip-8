@@ -8,15 +8,16 @@ void SDLDisplay::throwError(std::string error) {
     throw std::runtime_error("SDL Error: " + error);
 }
 
-void SDLDisplay::initSDLWindow(std::string title, int width, int height) {
+void SDLDisplay::initSDLWindow(std::string title, int windowWidth,
+                               int windowHeight) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         throwError(SDL_GetError());
     } else {
         window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED,
-                                  SDL_WINDOWPOS_UNDEFINED, width, height,
-                                  SDL_WINDOW_SHOWN);
-        this->width = width;
-        this->height = height;
+                                  SDL_WINDOWPOS_UNDEFINED, windowWidth,
+                                  windowHeight, SDL_WINDOW_SHOWN);
+        width = windowWidth;
+        height = windowHeight;
         if (window == NULL) {
             throwError(SDL_GetError());
         }
@@ -39,10 +40,11 @@ void SDLDisplay::initSDLRenderer() {
     }
 }
 
-void SDLDisplay::initSDLTexture(int width, int height) {
+void SDLDisplay::initSDLTexture(int textureWidth, int textureHeight) {
     // ARGB8888: 4 channels (alpha, red, green, blue), each channel has 8 bit
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
-                                SDL_TEXTUREACCESS_STREAMING, width, height);
+                                SDL_TEXTUREACCESS_STREAMING, textureWidth,
+                                textureHeight);
     if (texture == NULL) {
         throwError(SDL_GetError());
     }

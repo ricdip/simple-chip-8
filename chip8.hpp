@@ -3,7 +3,9 @@
 
 #define MEM_LEN 4096
 #define V_LEN 16
-#define GFX_LEN 64 * 32
+#define GFX_WIDTH 64
+#define GFX_HEIGHT 32
+#define GFX_LEN (GFX_WIDTH * GFX_HEIGHT)
 #define STACK_LEN 16
 #define KEY_LEN 16
 

@@ -3,8 +3,10 @@
 #include "chip8.hpp"
 #include "display.hpp"
 
+#define WINDOW_WIDTH 1024
+#define WINDOW_HEIGHT 512
 #define FPS 60
-#define MS_PER_CYCLE 1000 / FPS
+#define MS_PER_CYCLE (1000 / FPS)
 
 int main(void) {
     Chip8 chip8;
@@ -12,7 +14,7 @@ int main(void) {
     SDL_Event event;
 
     // initialize SDL
-    display.init("CHIP-8", 1024, 512, 64, 32);
+    display.init("CHIP-8", WINDOW_WIDTH, WINDOW_HEIGHT, GFX_WIDTH, GFX_HEIGHT);
 
     // loading ROM
     chip8.load("roms/IBM_logo.ch8");
@@ -38,7 +40,7 @@ int main(void) {
         chip8.emulateCycle();
         if (chip8.drawFlag) {
             chip8.drawFlag = false;
-            display.drawPixels(chip8.getGfx(), GFX_LEN, 64);
+            display.drawPixels(chip8.getGfx(), GFX_LEN, GFX_WIDTH);
         }
         endTick = SDL_GetTicks();
         frameSpeed = endTick - startTick;

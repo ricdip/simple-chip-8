@@ -13,9 +13,9 @@ class SDLDisplay {
     SDL_Renderer* renderer = NULL;
     SDL_Texture* texture = NULL;
 
-    void initSDLWindow(std::string title, int width, int height);
+    void initSDLWindow(std::string title, int windowWidth, int windowHeight);
     void initSDLRenderer();
-    void initSDLTexture(int width, int height);
+    void initSDLTexture(int textureWidth, int textureHeight);
     void throwError(std::string error);
 
    public:
