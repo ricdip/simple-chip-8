@@ -6,7 +6,7 @@
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 512
 #define FPS 60
-#define MS_PER_CYCLE (1000 / FPS)
+#define MS_PER_CYCLE (1000.f / FPS)
 
 int main(void) {
     Chip8 chip8;
@@ -21,7 +21,7 @@ int main(void) {
 
     // emulation cycle
     bool running = true;
-    unsigned int startTick, endTick, frameSpeed;
+    double startTick, endTick, frameSpeed;
     while (running) {
         // event loop
         while (SDL_PollEvent(&event)) {
