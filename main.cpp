@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 
-#include "chip8.hpp"
-#include "display.hpp"
+#include "emulation/chip8.hpp"
+#include "graphics/display.hpp"
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 512
