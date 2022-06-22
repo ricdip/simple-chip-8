@@ -110,6 +110,7 @@ void Chip8::load(const char* programPath) {
     }
 }
 
+// TODO: Missing OPCodes
 void Chip8::emulateCycle() {
     // fetch opcode
     // an opcode is 2 bytes long
