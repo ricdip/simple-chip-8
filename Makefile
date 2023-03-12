@@ -1,50 +1,40 @@
-# compiler options
-CC = g++
-CFLAGS = -pedantic -Wall -Wextra -Werror
-SDLFLAGS = $(shell pkg-config --cflags --libs sdl2)
-CFLAGSDEBUG = -pedantic -Wall -Wextra -Werror -fsanitize=address -g
+include config.mk
 
-# sources and objects
-SRC = graphics/display.cpp emulation/chip8.cpp main.cpp
-OBJ = main.exe
-OBJDEBUG = main_debug.exe
+.DEFAULT_GOAL := help
 
-
-.DEFAULT_GOAL: help
-
-# rules
-.SILENT: help
+.SILENT: help # show this help message
 help:
-	printf "%s \\t\\t %s\n" "help" "show this help message"
-	printf "%s \\t\\t %s\n" "all" "build, run and clean application"
-	printf "%s \\t\\t %s\n" "clean" "clean application"
-	printf "%s \\t\\t %s\n" "build" "build application"
-	printf "%s \\t %s\n" "build_debug" "build debug application (fsanitize included)"
-	printf "%s \\t\\t %s\n" "run" "run application"
-	printf "%s \\t %s\n" "run_debug" "run debug application"
+	@grep -E '^.PHONY:.+#.+' Makefile | sed 's/.PHONY: //' | awk -F ' # ' '{printf "%-15s %s\n", $$1, $$2}'
 
+.PHONY: build # build application
 build: $(SRC)
 	@echo "Building application files..."
 	$(CC) $(CFLAGS) $(SDLFLAGS) $(SRC) -o $(OBJ)
 
+.PHONY: build_debug # build debug application (fsanitize included)
 build_debug: $(SRC)
 	@echo "Building application files for debug..."
 	$(CC) $(CFLAGSDEBUG) $(SDLFLAGS) $(SRC) -o $(OBJDEBUG)
 
+.PHONY: clean # clean application files
 clean:
 	@echo "Cleaning application files..."
 	rm -f $(OBJ)
 	rm -f $(OBJDEBUG)
 
+.PHONY: run # run application
 run: build
 	@echo "Running application..."
 	./$(OBJ)
 
+.PHONY: run_debug # run debug application
 run_debug: build_debug
 	@echo "Running debug application..."
 	./$(OBJDEBUG)
 
+.PHONY: all # build, run and clean application
 all: clean build run clean
 
-
-.PHONY: help build build_debug clean run run_debug all
+.PHONY: format # format source files
+format:
+	clang-format -i $(FILES)

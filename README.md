@@ -9,7 +9,7 @@ A simple CHIP-8 emulator written in C++ for fun and training.
 
 - **graphics**: files that contain the graphical part of the emulator
 
-- **roms**: CHIP-8 ROM files that I found surfing the Internet
+- **roms**: CHIP-8 ROM files that I found [here](https://github.com/loktar00/chip8)
 
 - **main.cpp**: main file of the emulator
 
@@ -21,7 +21,7 @@ A simple CHIP-8 emulator written in C++ for fun and training.
 
 ## References
 
-Some really helpful articles that I used:
+Some really helpful resources that I used:
 
 - https://tobiasvl.github.io/blog/write-a-chip-8-emulator/
 
@@ -30,3 +30,5 @@ Some really helpful articles that I used:
 - https://en.wikipedia.org/wiki/CHIP-8
 
 - https://lazyfoo.net/tutorials/SDL/
+
+- https://github.com/loktar00/chip8
