@@ -1,11 +1,13 @@
-#include <SDL2/SDL.h>
-
 #include "emulation/chip8.hpp"
 #include "graphics/display.hpp"
 
+// screen width
 #define WINDOW_WIDTH 1024
+// screen height
 #define WINDOW_HEIGHT 512
+// frame per second = fps
 #define FPS 60
+// millisecond / fps
 #define MS_PER_CYCLE (1000.f / FPS)
 
 int main(void) {
@@ -36,13 +38,20 @@ int main(void) {
       }
     }
 
+    // timer start
     startTick = SDL_GetTicks();
+    // do one emulator cycle
     chip8.emulateCycle();
+    // draw flag is set
     if (chip8.drawFlag) {
+      // unset flag
       chip8.drawFlag = false;
+      // update screen
       display.drawPixels(chip8.getGfx(), GFX_LEN, GFX_WIDTH);
     }
+    // timer end
     endTick = SDL_GetTicks();
+    // frame speed = time delta (end - start)
     frameSpeed = endTick - startTick;
 
     // we need the sleep function to slow down the emulation

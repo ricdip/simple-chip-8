@@ -3,7 +3,9 @@
 #include <fstream>
 #include <stdexcept>
 
-unsigned char chip8Fontset[80] = {
+// CHIP-8 fontset
+// each font is 2 nibbles (or half-bytes) = 1 bytes = 8 bits
+uint8_t chip8Fontset[80] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -33,25 +35,25 @@ void Chip8::init() {
   SP = 0;
 
   // clear display
-  for (unsigned int i = 0; i < GFX_LEN; i++) {
+  for (uint16_t i = 0; i < GFX_LEN; i++) {
     gfx[i] = 0;
   }
   // clear stack
-  for (unsigned int i = 0; i < STACK_LEN; i++) {
+  for (uint16_t i = 0; i < STACK_LEN; i++) {
     stack[i] = 0;
   }
   // clear registers V0-VF
-  for (unsigned int i = 0; i < V_LEN; i++) {
+  for (uint16_t i = 0; i < V_LEN; i++) {
     V[i] = 0;
   }
   // clear memory
-  for (unsigned int i = 0; i < MEM_LEN; i++) {
+  for (uint16_t i = 0; i < MEM_LEN; i++) {
     memory[i] = 0;
   }
 
   // load fontset into memory
   // (from memory location 0 to 80)
-  for (unsigned int i = 0; i < 80; i++) {
+  for (uint8_t i = 0; i < 80; i++) {
     memory[i] = chip8Fontset[i];
   }
 
@@ -67,10 +69,13 @@ Chip8::Chip8() {
   init();
 }
 
-void Chip8::load(const char *programPath) {
+void Chip8::load(const std::string programPath) {
+  // file
   std::ifstream file;
+  // file size
   std::streampos size;
-  char *fileContent;
+  // file contents
+  uint8_t *fileContent;
 
   // opening program ROM
   // mode:
@@ -85,7 +90,8 @@ void Chip8::load(const char *programPath) {
     // the position is at the end of file, so is the size of the file
     // that we opened)
     size = file.tellg();
-    fileContent = new char[size];
+    // file contents length is size of file
+    fileContent = new uint8_t[size];
     // seekg: we change the location of get position
     // (we set the pointer at the beginning of
     // the file)
@@ -94,19 +100,21 @@ void Chip8::load(const char *programPath) {
     //  - direction = ios::beg -> beginning of stream
     file.seekg(0, std::ios::beg);
     // reading program ROM file
-    file.read(fileContent, size);
+    file.read((char *)fileContent, size);
     // closing program ROM
     file.close();
 
     // loading program ROM into memory
     // (we start filling the memory from location 0x200 = 512)
-    for (unsigned int i = 0; i < size; i++) {
+    for (uint16_t i = 0; i < size; i++) {
       memory[i + 512] = fileContent[i];
     }
 
+    // contents already copied, freeing memory
     delete[] fileContent;
   } else {
-    throw std::runtime_error("Unable to open file");
+    // file is not opened, error
+    throw std::runtime_error("Unable to open file: " + programPath);
   }
 }
 
@@ -132,17 +140,23 @@ void Chip8::emulateCycle() {
     switch (opcode & 0x000F) {
     // 00E0: clear screen
     case 0x0000:
-      for (unsigned int i = 0; i < GFX_LEN; i++) {
+      // zeroing screen
+      for (uint16_t i = 0; i < GFX_LEN; i++) {
         gfx[i] = 0;
       }
+      // redraw screen
       drawFlag = true;
+      // PC and PC + 1 visited, next fetch is in PC + 2
       PC += 2;
       break;
 
     // 00EE: return from subroutine
     case 0x000E:
+      // decrement stack pointer
       SP--;
+      // get new PC from stack at position stack pointer
       PC = stack[SP];
+      // PC and PC + 1 visited, next fetch is in PC + 2
       PC += 2;
       break;
     }
@@ -152,24 +166,31 @@ void Chip8::emulateCycle() {
   case 0x1000:
     // we set PC to NNN, causing the program to jump
     // to that memory location. We do not increment PC afterwards
+    // PC = NNN
     PC = opcode & 0x0FFF;
     break;
 
   // 6XNN: set VX = NN
   case 0x6000:
+    // VX = NN
     V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+    // PC and PC + 1 visited, next fetch is in PC + 2
     PC += 2;
     break;
 
   // 7XNN: adds NN to VX (carry flag is not changed)
   case 0x7000:
+    // VX += NN
     V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+    // PC and PC + 1 visited, next fetch is in PC + 2
     PC += 2;
     break;
 
   // ANNN: sets I = NNN
   case 0xA000:
+    // I = NNN
     I = opcode & 0x0FFF;
+    // PC and PC + 1 visited, next fetch is in PC + 2
     PC += 2;
     break;
 
@@ -181,21 +202,24 @@ void Chip8::emulateCycle() {
   // any screen pixels are flipped from set to unset when the sprite is
   // drawn, and to 0 if that doesn’t happen.
   case 0xD000: {
-    // fetch position and height of the sprite
-    unsigned short x = V[(opcode & 0x0F00) >> 8];
-    unsigned short y = V[(opcode & 0x00F0) >> 4];
-    unsigned short height = opcode & 0x000F;
+    // fetch position (x, y) and height of the sprite
+    // VX
+    uint8_t x = V[(opcode & 0x0F00) >> 8];
+    // VY
+    uint8_t y = V[(opcode & 0x00F0) >> 4];
+    // H
+    uint8_t height = opcode & 0x000F;
     // pixel value
-    unsigned short pixel;
+    uint8_t pixel;
     // reset register VF
     V[0xF] = 0;
     // loop over each row
-    for (int yline = 0; yline < height; yline++) {
+    for (uint8_t yline = 0; yline < height; yline++) {
       // fetch the pixel value from the memory
       // starting at location I
       pixel = memory[I + yline];
-      // loop over 8-bits of 1 row
-      for (int xline = 0; xline < 8; xline++) {
+      // loop over 8 bits of 1 row
+      for (uint8_t xline = 0; xline < 8; xline++) {
         // check if current evaluated pixel is set
         // to 1 (`0x80 >> xline` scan through the byte, one bit at
         // the time -> 0x80 = 10000000)
@@ -207,6 +231,7 @@ void Chip8::emulateCycle() {
             V[0xF] = 1;
           }
           // set the pixel value by using bitwise XOR
+          // true to false, false to true
           gfx[x + xline + ((y + yline) * 64)] ^= 1;
         }
       }
@@ -220,6 +245,7 @@ void Chip8::emulateCycle() {
   } break;
 
   default:
+    // unknown opcode detected
     throw std::runtime_error("Unknown opcode");
   }
 

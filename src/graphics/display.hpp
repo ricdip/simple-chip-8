@@ -1,8 +1,8 @@
-#ifndef DISPLAY_HPP
-#define DISPLAY_HPP
+#pragma once
 
 #include <SDL2/SDL.h>
 
+#include <cstdint>
 #include <string>
 
 class SDLDisplay {
@@ -13,16 +13,13 @@ private:
   SDL_Renderer *renderer = NULL;
   SDL_Texture *texture = NULL;
 
-  void initSDLWindow(std::string title, int windowWidth, int windowHeight);
+  void initSDLWindow(std::string, int, int);
   void initSDLRenderer();
-  void initSDLTexture(int textureWidth, int textureHeight);
-  void throwError(std::string error);
+  void initSDLTexture(int, int);
+  void throwError(std::string);
 
 public:
-  void init(std::string title, int windowWidth, int windowHeight,
-            int textureWidth, int textureHeight);
-  void drawPixels(const bool *gfx, unsigned int size, int textureWidth);
+  void init(std::string, int, int, int, int);
+  void drawPixels(const bool *, uint16_t, int);
   void close();
 };
-
-#endif

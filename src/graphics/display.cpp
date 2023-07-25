@@ -1,7 +1,5 @@
 #include "display.hpp"
 
-#include <SDL2/SDL.h>
-
 #include <stdexcept>
 
 void SDLDisplay::throwError(std::string error) {
@@ -57,24 +55,28 @@ void SDLDisplay::init(std::string title, int windowWidth, int windowHeight,
   initSDLTexture(textureWidth, textureHeight);
 }
 
-void SDLDisplay::drawPixels(const bool *gfx, unsigned int size,
-                            int textureWidth) {
-  unsigned int *pixels = new unsigned int[size];
-  for (unsigned int i = 0; i < size; i++) {
+void SDLDisplay::drawPixels(const bool *gfx, uint16_t size, int textureWidth) {
+  // a pixel is 4 bytes = 32 bits long: 0xAARRGGBB (ARGB)
+  uint32_t *pixels = new uint32_t[size];
+  // iterate through the graphics
+  for (uint16_t i = 0; i < size; i++) {
     if (gfx[i]) {
+      // pixel is 1, so draw white pixel to screen
       pixels[i] = 0xFFFFFFFF;
     } else {
+      // pixel is 0, so draw black pixel to screen
       pixels[i] = 0xFF000000;
     }
   }
 
   // update texture
-  SDL_UpdateTexture(texture, NULL, pixels, textureWidth * sizeof(unsigned int));
+  SDL_UpdateTexture(texture, NULL, pixels, textureWidth * sizeof(uint32_t));
   // clear screen and render
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
 
+  // pixels already drawn, freeing memory
   delete[] pixels;
 }
 
